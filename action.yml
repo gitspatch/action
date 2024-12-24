@@ -11,7 +11,7 @@ inputs:
 outputs:
   payload:
     description: "Parsed webhook payload"
-    value: ${{ inputs.event_payload && fromJSON(inputs.event_payload) || null }}
+    value: ${{ fromJSON(inputs.event_payload) }}
 
 runs:
   using: "composite"
@@ -22,5 +22,5 @@ runs:
         resp=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
         "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=gitspatch")
         oidc_token=$(jq -r '.value' <<< "${resp}")
-        curl -X POST https://www.gitspatch.dev/action/workflow-run -H "Authorization: Bearer ${oidc_token}" -d "{\"event_id\": \"${{ github.event.inputs.webhook_event_id }}\"}"
+        curl -X POST https://www.gitspatch.dev/action/workflow-run -H "Authorization: Bearer ${oidc_token}" -d "{\"event_id\": \"${{ inputs.event_id }}\"}"
       shell: bash
