@@ -8,11 +8,6 @@ inputs:
     description: 'Original webhook payload as string'
     required: false
 
-outputs:
-  payload:
-    description: "Parsed webhook payload"
-    value: ${{ fromJSON(inputs.event_payload) }}
-
 runs:
   using: "composite"
   steps:
