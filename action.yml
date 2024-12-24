@@ -1,0 +1,26 @@
+name: 'Gitspatch'
+description: 'Report workflow run to Gitspatch and parse payload'
+inputs:
+  event_id:
+    description: 'Event ID from Gitspatch'
+    required: true
+  event_payload:
+    description: 'Original webhook payload as string'
+    required: false
+
+outputs:
+  payload:
+    description: "Parsed webhook payload"
+    value: ${{ inputs.event_payload && fromJSON(inputs.event_payload) || null }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Report workflow run
+      run: |
+        # retrieve the ambient OIDC token
+        resp=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+        "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=gitspatch")
+        oidc_token=$(jq -r '.value' <<< "${resp}")
+        curl -X POST https://www.gitspatch.dev/action/workflow-run -H "Authorization: Bearer ${oidc_token}" -d "{\"event_id\": \"${{ github.event.inputs.webhook_event_id }}\"}"
+      shell: bash
